@@ -33,7 +33,7 @@ func (ss *StudentStorage) Get(studentID int) (*university.Student, error) {
 }
 
 //Delete deletes a student record in memory.
-func (ss *StudentStorage) Delete(student university.Student) (int, error) {
+func (ss *StudentStorage) Delete(int) error {
 
-	return 0, nil
+	return nil
 }
