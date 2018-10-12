@@ -10,6 +10,8 @@ import (
 
 func TestStorageSet(t *testing.T) {
 	storage := memory.StudentStorage{}
+	storage.Store = make(map[int]*university.Student)
+
 	student := &university.Student{
 		ID:   1,
 		Name: "Rogerinho",
@@ -23,5 +25,10 @@ func TestStorageSet(t *testing.T) {
 
 	if id != student.ID {
 		t.Error("unexpected ID", "id", id, "expected", student.ID)
+	}
+
+	_, err = storage.Set(nil)
+	if err == nil {
+		t.Error("set method cannot accept nil values without returning an error")
 	}
 }

@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"log"
+	"errors"
 
 	"github.com/alyssong/university-api/university"
 )
@@ -10,13 +10,16 @@ import (
 //as disk to store.
 type StudentStorage struct {
 	Store map[int]*university.Student
-	log   *log.Logger
 }
 
 //Set creates or updates a student record in memory.
 func (ss *StudentStorage) Set(student *university.Student) (int, error) {
+	if student == nil {
+		return 0, errors.New("Student is nil. There's no data to store")
+	}
 
-	return 0, nil
+	ss.Store[student.ID] = student
+	return student.ID, nil
 }
 
 //Get retrives a student record in memory.
