@@ -23,9 +23,13 @@ func (ss *StudentStorage) Set(student *university.Student) (int, error) {
 }
 
 //Get retrives a student record in memory.
-func (ss *StudentStorage) Get(studenID int) (*university.Student, error) {
+func (ss *StudentStorage) Get(studentID int) (*university.Student, error) {
+	student, ok := ss.Store[studentID]
+	if !ok {
+		return nil, errors.New("Empty result")
+	}
 
-	return nil, nil
+	return student, nil
 }
 
 //Delete deletes a student record in memory.
