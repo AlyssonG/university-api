@@ -78,4 +78,8 @@ func TestStorageDelete(t *testing.T) {
 	if err != nil {
 		t.Error("delete operation is not ok", "err", err)
 	}
+
+	if storage.Store[1] != nil {
+		t.Error("delete operation is not deleting from memory")
+	}
 }
