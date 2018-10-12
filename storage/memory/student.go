@@ -38,6 +38,6 @@ func (ss *StudentStorage) Delete(studentID int) error {
 		return errors.New("There is no record for this id")
 	}
 
-	ss.Store[studentID] = nil
+	delete(ss.Store, studentID)
 	return nil
 }
