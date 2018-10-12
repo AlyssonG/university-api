@@ -27,9 +27,9 @@ func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	student, err := sh.Storage.Get(studentID)
-	if err != nil {
+	if err != nil || student == nil {
 		http.Error(w, "student nostudent not foundt found", http.StatusNotFound)
-		sh.Logger.Println("student not found for id", studentID)
+		sh.Logger.Println("student not found for id", studentID, "err", err)
 		return
 	}
 
