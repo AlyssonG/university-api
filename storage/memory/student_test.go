@@ -60,3 +60,22 @@ func TestStorageGet(t *testing.T) {
 		t.Error("invalid data for stored student")
 	}
 }
+
+func TestStorageDelete(t *testing.T) {
+	storage := memory.StudentStorage{
+		Store: make(map[int]*university.Student),
+	}
+
+	student := &university.Student{
+		ID:   1,
+		Name: "Rogerinho",
+		Code: "Do Ingá",
+	}
+
+	storage.Store[1] = student
+
+	err := storage.Delete(1)
+	if err != nil {
+		t.Error("delete operation is not ok", "err", err)
+	}
+}
