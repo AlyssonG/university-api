@@ -32,7 +32,9 @@ func TestGetStudent(t *testing.T) {
 
 	studentHandle.Storage.Set(student)
 
-	writter := &httptest.ResponseRecorder{}
+	writter := &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
 	request := &http.Request{
 		URL: &url.URL{
 			RawQuery: "id=1",
@@ -53,7 +55,7 @@ func TestGetStudent(t *testing.T) {
 		t.Fatal("error while converting student to json")
 	}
 
-	if bytes.Equal(writter.Body.Bytes(), body) {
+	if !bytes.Equal(writter.Body.Bytes(), body) {
 		t.Error("wrong return for student request")
 	}
 }
