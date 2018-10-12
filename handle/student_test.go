@@ -31,10 +31,10 @@ func TestGetStudent(t *testing.T) {
 	}
 
 	studentHandle.Storage.Set(student)
-
 	writter := &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
+
 	request := &http.Request{
 		URL: &url.URL{
 			RawQuery: "id=1",
@@ -57,5 +57,16 @@ func TestGetStudent(t *testing.T) {
 
 	if !bytes.Equal(writter.Body.Bytes(), body) {
 		t.Error("wrong return for student request")
+	}
+
+	studentHandle.Storage.Delete(1)
+
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.GetStudent(writter, request)
+	if writter.Code != http.StatusNotFound {
+		t.Error("expecting status not found when student is not in storage", "status", writter.Code)
 	}
 }
