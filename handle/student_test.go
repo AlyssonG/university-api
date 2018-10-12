@@ -69,4 +69,35 @@ func TestGetStudent(t *testing.T) {
 	if writter.Code != http.StatusNotFound {
 		t.Error("expecting status not found when student is not in storage", "status", writter.Code)
 	}
+
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	request = &http.Request{
+		URL: &url.URL{
+			RawQuery: "id=abc",
+		},
+	}
+
+	studentHandle.GetStudent(writter, request)
+	if writter.Code != http.StatusInternalServerError {
+		t.Error("expecting status internal server error when student id is invalid", "status", writter.Code)
+	}
+
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	request = &http.Request{
+		URL: &url.URL{
+			RawQuery: "",
+		},
+	}
+
+	studentHandle.GetStudent(writter, request)
+	if writter.Code != http.StatusInternalServerError {
+		t.Error("expecting status internal server error when student id is invalid", "status", writter.Code)
+	}
+
 }
