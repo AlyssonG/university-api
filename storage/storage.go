@@ -8,5 +8,5 @@ import "github.com/alyssong/university-api/university"
 type Student interface {
 	Set(*university.Student) (int, error)
 	Get(int) (*university.Student, error)
-	Delete(int) (bool, error)
+	Delete(int) error
 }
