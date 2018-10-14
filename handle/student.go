@@ -69,6 +69,12 @@ func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sh.Storage.Set(student)
+	_, err = sh.Storage.Set(student)
+	if err != nil {
+		http.Error(w, "error while saving student in db", http.StatusInternalServerError)
+		sh.Logger.Println("error while saving student in db", "err", err)
+		return
+	}
+
 	w.Write([]byte("success"))
 }
