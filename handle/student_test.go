@@ -68,3 +68,61 @@ func TestGetStudent(t *testing.T) {
 		t.Error("expecting status not found when student is not in storage", "status", writter.Code)
 	}
 }
+
+func TestSetStudent(t *testing.T) {
+	studentHandle := &handle.StudentHandle{
+		Logger: log.New(os.Stdout, " test ", 0),
+		Storage: &memory.StudentStorage{
+			Store: make(map[string]*university.Student),
+		},
+	}
+
+	writter := &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	student := &university.Student{
+		Code: "test",
+		Name: "Name test",
+	}
+
+	body, err := json.Marshal(student)
+	if err != nil {
+		t.Fatal("error on json marshal", "err", err)
+	}
+
+	buf := &bytes.Buffer{}
+	buf.Write(body)
+
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/student", buf)
+
+	studentHandle.SetStudent(writter, request)
+
+	if writter.Code != http.StatusOK {
+		t.Fatal("invalid status code for a valid request", "code", writter.Code)
+	}
+
+	if s, err := studentHandle.Storage.Get("test"); s.Name != student.Name || err != nil {
+		t.Error("student storage is not ok", "err", err)
+	}
+
+	body, err = json.Marshal(student)
+	if err != nil {
+		t.Fatal("error on json marshal", "err", err)
+	}
+
+	buf = &bytes.Buffer{}
+	buf.Write(body)
+
+	request = httptest.NewRequest(http.MethodPost, "http://localhost:8080/student", buf)
+
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.SetStudent(writter, request)
+
+	if writter.Code != http.StatusConflict {
+		t.Error("cannot create two student records with the same code", "status code", writter.Code)
+	}
+}

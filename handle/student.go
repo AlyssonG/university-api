@@ -2,8 +2,11 @@ package handle
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/alyssong/university-api/university"
 
 	"github.com/alyssong/university-api/storage"
 )
@@ -30,7 +33,42 @@ func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "error while enconding student", http.StatusInternalServerError)
 		sh.Logger.Println("error while encoding student to json", "err", err)
+		return
 	}
+
 	w.Header().Set("Content-Type", "Application/json")
 	w.Write(body)
+}
+
+func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, "invalid request body", http.StatusInternalServerError)
+		sh.Logger.Println("invalid body to create student", "body", string(body))
+		return
+	}
+
+	student := &university.Student{}
+	err = json.Unmarshal(body, student)
+	if err != nil {
+		http.Error(w, "invalid request body", http.StatusInternalServerError)
+		sh.Logger.Println("error while creating student object", "body", string(body))
+		return
+	}
+
+	if s, _ := sh.Storage.Get(student.Code); s != nil {
+		http.Error(w, "a student with this data is registred in the system", http.StatusConflict)
+		sh.Logger.Println("a student with this data is registred in the system", "code", s.Code)
+		return
+	}
+
+	sh.Storage.Set(student)
+	w.Write([]byte("success"))
 }
