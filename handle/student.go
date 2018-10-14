@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/alyssong/university-api/storage"
 )
@@ -18,17 +17,11 @@ type StudentHandle struct {
 //GetStudent expects a parameter ID and returns data for a student with that id
 func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
-	value := query.Get("id")
-	studentID, err := strconv.Atoi(value)
-	if err != nil {
-		http.Error(w, "invalid type for student id. expecting int", http.StatusInternalServerError)
-		sh.Logger.Println("invalid type for student id", "value", value)
-		return
-	}
+	studentID := query.Get("id")
 
 	student, err := sh.Storage.Get(studentID)
 	if err != nil || student == nil {
-		http.Error(w, "student nostudent not foundt found", http.StatusNotFound)
+		http.Error(w, "student not foundt found", http.StatusNotFound)
 		sh.Logger.Println("student not found for id", studentID, "err", err)
 		return
 	}

@@ -10,22 +10,21 @@ import (
 
 func TestStorageSet(t *testing.T) {
 	storage := memory.StudentStorage{
-		Store: make(map[int]*university.Student),
+		Store: make(map[string]*university.Student),
 	}
 
 	student := &university.Student{
-		ID:   1,
 		Name: "Rogerinho",
-		Code: "Do Ingá",
+		Code: "ABC",
 	}
 
-	id, err := storage.Set(student)
+	code, err := storage.Set(student)
 	if err != nil {
 		t.Fatal("this operation does not expect error")
 	}
 
-	if id != student.ID {
-		t.Error("unexpected ID", "id", id, "expected", student.ID)
+	if code != student.Code {
+		t.Error("unexpected Code", "code", code, "expected", student.Code)
 	}
 
 	_, err = storage.Set(nil)
@@ -36,18 +35,17 @@ func TestStorageSet(t *testing.T) {
 
 func TestStorageGet(t *testing.T) {
 	storage := memory.StudentStorage{
-		Store: make(map[int]*university.Student),
+		Store: make(map[string]*university.Student),
 	}
 
 	student := &university.Student{
-		ID:   1,
 		Name: "Rogerinho",
-		Code: "Do Ingá",
+		Code: "ABC",
 	}
 
-	storage.Store[1] = student
+	storage.Store["ABC"] = student
 
-	storedStudent, err := storage.Get(1)
+	storedStudent, err := storage.Get("ABC")
 	if err != nil {
 		t.Fatal("unexpected error", "err", err)
 	}
@@ -56,30 +54,29 @@ func TestStorageGet(t *testing.T) {
 		t.Fatal("invalid return for storage get. student is nil")
 	}
 
-	if student.ID != storedStudent.ID || student.Name != storedStudent.Name || student.Code != storedStudent.Code {
+	if student.Name != storedStudent.Name || student.Code != storedStudent.Code {
 		t.Error("invalid data for stored student")
 	}
 }
 
 func TestStorageDelete(t *testing.T) {
 	storage := memory.StudentStorage{
-		Store: make(map[int]*university.Student),
+		Store: make(map[string]*university.Student),
 	}
 
 	student := &university.Student{
-		ID:   1,
 		Name: "Rogerinho",
 		Code: "Do Ingá",
 	}
 
-	storage.Store[1] = student
+	storage.Store["ABC"] = student
 
-	err := storage.Delete(1)
+	err := storage.Delete("ABC")
 	if err != nil {
 		t.Error("delete operation is not ok", "err", err)
 	}
 
-	if storage.Store[1] != nil {
+	if storage.Store["ABC"] != nil {
 		t.Error("delete operation is not deleting from memory")
 	}
 }

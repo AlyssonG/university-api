@@ -9,22 +9,22 @@ import (
 //StudentStorage is responsible for handle with student storage operations using memory
 //as disk to store.
 type StudentStorage struct {
-	Store map[int]*university.Student
+	Store map[string]*university.Student
 }
 
 //Set creates or updates a student record in memory.
-func (ss *StudentStorage) Set(student *university.Student) (int, error) {
+func (ss *StudentStorage) Set(student *university.Student) (string, error) {
 	if student == nil {
-		return 0, errors.New("Student is nil. There's no data to store")
+		return "", errors.New("Student is nil. There's no data to store")
 	}
 
-	ss.Store[student.ID] = student
-	return student.ID, nil
+	ss.Store[student.Code] = student
+	return student.Code, nil
 }
 
 //Get retrives a student record in memory.
-func (ss *StudentStorage) Get(studentID int) (*university.Student, error) {
-	student, ok := ss.Store[studentID]
+func (ss *StudentStorage) Get(studentCode string) (*university.Student, error) {
+	student, ok := ss.Store[studentCode]
 	if !ok {
 		return nil, errors.New("Empty result")
 	}
@@ -33,11 +33,11 @@ func (ss *StudentStorage) Get(studentID int) (*university.Student, error) {
 }
 
 //Delete deletes a student record in memory.
-func (ss *StudentStorage) Delete(studentID int) error {
-	if ss.Store[studentID] == nil {
+func (ss *StudentStorage) Delete(studentCode string) error {
+	if ss.Store[studentCode] == nil {
 		return errors.New("There is no record for this id")
 	}
 
-	delete(ss.Store, studentID)
+	delete(ss.Store, studentCode)
 	return nil
 }

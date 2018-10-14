@@ -20,14 +20,13 @@ func TestGetStudent(t *testing.T) {
 	studentHandle := &handle.StudentHandle{
 		Logger: log.New(os.Stdout, " test ", 0),
 		Storage: &memory.StudentStorage{
-			Store: make(map[int]*university.Student),
+			Store: make(map[string]*university.Student),
 		},
 	}
 
 	student := &university.Student{
-		ID:   1,
 		Name: "Rogerinho",
-		Code: "Do Ingá",
+		Code: "abc",
 	}
 
 	studentHandle.Storage.Set(student)
@@ -37,7 +36,7 @@ func TestGetStudent(t *testing.T) {
 
 	request := &http.Request{
 		URL: &url.URL{
-			RawQuery: "id=1",
+			RawQuery: "id=abc",
 		},
 	}
 
@@ -59,8 +58,7 @@ func TestGetStudent(t *testing.T) {
 		t.Error("wrong return for student request")
 	}
 
-	studentHandle.Storage.Delete(1)
-
+	studentHandle.Storage.Delete("abc")
 	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
@@ -69,35 +67,4 @@ func TestGetStudent(t *testing.T) {
 	if writter.Code != http.StatusNotFound {
 		t.Error("expecting status not found when student is not in storage", "status", writter.Code)
 	}
-
-	writter = &httptest.ResponseRecorder{
-		Body: &bytes.Buffer{},
-	}
-
-	request = &http.Request{
-		URL: &url.URL{
-			RawQuery: "id=abc",
-		},
-	}
-
-	studentHandle.GetStudent(writter, request)
-	if writter.Code != http.StatusInternalServerError {
-		t.Error("expecting status internal server error when student id is invalid", "status", writter.Code)
-	}
-
-	writter = &httptest.ResponseRecorder{
-		Body: &bytes.Buffer{},
-	}
-
-	request = &http.Request{
-		URL: &url.URL{
-			RawQuery: "",
-		},
-	}
-
-	studentHandle.GetStudent(writter, request)
-	if writter.Code != http.StatusInternalServerError {
-		t.Error("expecting status internal server error when student id is invalid", "status", writter.Code)
-	}
-
 }
