@@ -111,3 +111,26 @@ func (p *Professor) SetProfessor(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("{\"status\": \"success\"}"))
 }
+
+func (p *Professor) DeleteProfessor(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := r.URL.Query()
+	code := query.Get("code")
+
+	professor, err := p.Storage.Get(code)
+	if professor == nil || err != nil {
+		http.Error(w, "cannot find professor to delete", http.StatusNotFound)
+		p.Logger.Println("error while finding professor to delete", "err", err)
+		return
+	}
+
+	err = p.Storage.Delete(code)
+	if err != nil {
+
+	}
+	w.Write([]byte("{\"status\": \"success\"}"))
+}

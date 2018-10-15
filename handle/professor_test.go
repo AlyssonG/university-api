@@ -178,3 +178,54 @@ func TestSetProfessor(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteProfessor(t *testing.T) {
+	professorHandle := setup()
+
+	w, r := buildRequest(http.MethodGet, "http://localhost:8000", nil)
+	professorHandle.DeleteProfessor(w, r)
+
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Error("accepting wrong http method. should return", http.StatusMethodNotAllowed, "but got", w.Code)
+	}
+
+	tctc := []struct {
+		Name       string
+		Professors []*university.Professor
+		Code       string
+		URL        string
+		StatusCode int
+	}{
+		{
+			Name:       "delete with empty storage",
+			URL:        "code=1",
+			StatusCode: http.StatusNotFound,
+		},
+		{
+			Name:       "delete one professor",
+			URL:        "code=1",
+			Code:       "1",
+			StatusCode: http.StatusOK,
+			Professors: []*university.Professor{
+				{
+					Code: "1",
+				},
+			},
+		},
+	}
+
+	for _, tc := range tctc {
+		professorHandle := setup()
+		for _, professor := range tc.Professors {
+			professorHandle.Storage.Set(professor)
+		}
+
+		w, r := buildRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8000/professor/delete?%s", tc.URL), nil)
+		professorHandle.DeleteProfessor(w, r)
+
+		if w.Code != tc.StatusCode {
+			t.Error("unexpected status code. should return", tc.StatusCode, "but got", w.Code)
+		}
+
+	}
+}
