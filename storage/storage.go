@@ -11,3 +11,10 @@ type Student interface {
 	GetAll() ([]*university.Student, error)
 	Delete(string) error
 }
+
+type Professor interface {
+	Set(*university.Professor) (string, error)
+	Get(string) (*university.Professor, error)
+	GetAll() ([]*university.Professor, error)
+	Delete(string) error
+}
