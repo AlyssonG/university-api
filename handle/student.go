@@ -135,3 +135,45 @@ func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("deleted"))
 }
+
+func (sh *StudentHandle) UpdateStudent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := r.URL.Query()
+	code := query.Get("code")
+
+	student, _ := sh.Storage.Get(code)
+	if student == nil {
+		http.Error(w, "student not found", http.StatusNotFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, "error while reading request body", http.StatusInternalServerError)
+		sh.Logger.Println("error while reading request body", "err", err)
+	}
+
+	studentData := &university.Student{}
+	err = json.Unmarshal(body, studentData)
+	if err != nil {
+		http.Error(w, "error while parsing body", http.StatusInternalServerError)
+		sh.Logger.Println("error while parsing student body to struct", "err", err)
+		return
+	}
+
+	student.Name = studentData.Name
+	student.Course = studentData.Course
+	_, err = sh.Storage.Set(student)
+	if err != nil {
+		http.Error(w, "error on student storage", http.StatusInternalServerError)
+		sh.Logger.Println("cannot update student record in storage", "err", err)
+		return
+	}
+
+	w.Write([]byte("success"))
+}

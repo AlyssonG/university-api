@@ -215,3 +215,61 @@ func TestDeleteStudent(t *testing.T) {
 		t.Error("invalid status for successful operation", "code", writter.Code)
 	}
 }
+
+func TestUpdateStudent(t *testing.T) {
+	studentHandle := &handle.StudentHandle{
+		Logger: log.New(os.Stdout, " test ", 0),
+		Storage: &memory.StudentStorage{
+			Store: make(map[string]*university.Student),
+		},
+	}
+
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student/update?code=test", nil)
+	writter := &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.UpdateStudent(writter, request)
+	if writter.Code != http.StatusMethodNotAllowed {
+		t.Error("invalid http method for update student endpoint")
+	}
+
+	request = httptest.NewRequest(http.MethodPut, "http://localhost:8080/student/update?code=test", nil)
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.UpdateStudent(writter, request)
+	if writter.Code != http.StatusNotFound {
+		t.Error("updating a non existing student should throw a not found status", "got", writter.Code)
+	}
+
+	student := &university.Student{
+		Name:   "test",
+		Code:   "test",
+		Course: "CS",
+	}
+
+	studentHandle.Storage.Set(student)
+
+	student.Course = "EC"
+
+	body, _ := json.Marshal(student)
+	buffer := &bytes.Buffer{}
+	buffer.Write(body)
+
+	request = httptest.NewRequest(http.MethodPut, "http://localhost:8080/student/update?code=test", buffer)
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.UpdateStudent(writter, request)
+	if writter.Code != http.StatusOK {
+		t.Fatal("invalid status code for a valid request", "got", writter.Code, "expected", http.StatusOK)
+	}
+
+	result, _ := studentHandle.Storage.Get(student.Code)
+	if result.Course != student.Course {
+		t.Error("update student endpoint is not updating record in storage", "expected", student.Course, "got", result.Course)
+	}
+}
