@@ -76,7 +76,7 @@ func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("success"))
+	w.Write([]byte("created"))
 }
 
 func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
