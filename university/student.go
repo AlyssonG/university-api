@@ -2,7 +2,7 @@ package university
 
 //Student defines the data for college a student
 type Student struct {
-	Name   string
-	Code   string
-	Course string
+	Name   string `json:"name"`
+	Code   string `json:"code"`
+	Course string `json:"course"`
 }
