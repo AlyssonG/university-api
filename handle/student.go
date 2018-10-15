@@ -78,3 +78,23 @@ func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("success"))
 }
+
+func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	code := query.Get("code")
+
+	student, _ := sh.Storage.Get(code)
+	if student == nil {
+		http.Error(w, "this student does not exists", http.StatusNotFound)
+		return
+	}
+
+	err := sh.Storage.Delete(code)
+	if err != nil {
+		http.Error(w, "error while deleting record", http.StatusInternalServerError)
+		sh.Logger.Println("error while deleting student record", "err", err)
+		return
+	}
+
+	w.Write([]byte("deleted"))
+}

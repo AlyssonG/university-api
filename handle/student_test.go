@@ -126,3 +126,39 @@ func TestSetStudent(t *testing.T) {
 		t.Error("cannot create two student records with the same code", "status code", writter.Code)
 	}
 }
+
+func TestDeleteStudent(t *testing.T) {
+	studentHandle := &handle.StudentHandle{
+		Logger: log.New(os.Stdout, " test ", 0),
+		Storage: &memory.StudentStorage{
+			Store: make(map[string]*university.Student),
+		},
+	}
+
+	writter := &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:8080/student/delete?code=test", nil)
+
+	studentHandle.DeleteStudent(writter, request)
+	if writter.Code != http.StatusNotFound {
+		t.Error("it cant be possible to delete a non existing student record")
+	}
+
+	student := &university.Student{
+		Name: "test",
+		Code: "test",
+	}
+
+	studentHandle.Storage.Set(student)
+
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.DeleteStudent(writter, request)
+	if writter.Code != http.StatusOK {
+		t.Error("invalid status for successful operation", "code", writter.Code)
+	}
+}
