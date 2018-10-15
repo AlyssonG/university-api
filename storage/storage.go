@@ -8,5 +8,6 @@ import "github.com/alyssong/university-api/university"
 type Student interface {
 	Set(*university.Student) (string, error)
 	Get(string) (*university.Student, error)
+	GetAll() ([]*university.Student, error)
 	Delete(string) error
 }
