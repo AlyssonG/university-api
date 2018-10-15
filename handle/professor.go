@@ -130,7 +130,53 @@ func (p *Professor) DeleteProfessor(w http.ResponseWriter, r *http.Request) {
 
 	err = p.Storage.Delete(code)
 	if err != nil {
-
+		http.Error(w, "error while deleting professor", http.StatusInternalServerError)
+		p.Logger.Println("error while deleting professor", "err", err)
+		return
 	}
+
+	w.Write([]byte("{\"status\": \"success\"}"))
+}
+
+func (p *Professor) UpdateProfessor(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := r.URL.Query()
+	code := query.Get("code")
+
+	professor, _ := p.Storage.Get(code)
+	if professor == nil {
+		http.Error(w, "professor not found", http.StatusNotFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, "error while reading request body", http.StatusInternalServerError)
+		p.Logger.Println("error while reading request body", "err", err)
+	}
+
+	professorData := &university.Professor{}
+	err = json.Unmarshal(body, professorData)
+	if err != nil {
+		http.Error(w, "error while parsing body", http.StatusInternalServerError)
+		p.Logger.Println("error while parsing professor body to struct", "err", err)
+		return
+	}
+
+	professor.Name = professorData.Name
+	professor.Department = professorData.Department
+
+	_, err = p.Storage.Set(professor)
+	if err != nil {
+		http.Error(w, "error on professor storage", http.StatusInternalServerError)
+		p.Logger.Println("cannot update professor record in storage", "err", err)
+		return
+	}
+
 	w.Write([]byte("{\"status\": \"success\"}"))
 }

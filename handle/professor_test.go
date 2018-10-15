@@ -229,3 +229,66 @@ func TestDeleteProfessor(t *testing.T) {
 
 	}
 }
+
+func TestUpdateProfessor(t *testing.T) {
+	professorHandle := setup()
+
+	w, r := buildRequest(http.MethodGet, "http://localhost:8080", nil)
+	professorHandle.UpdateProfessor(w, r)
+
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Error("accepting wrong http method. should return", http.StatusMethodNotAllowed, "but got", w.Code)
+	}
+
+	tctc := []struct {
+		Name                 string
+		StatusCode           int
+		Professors           []*university.Professor
+		ProfessorCode        string
+		ExpectedResult, Body []byte
+	}{
+		{
+			Name:       "with empty storage",
+			Body:       bodyBuilder(&university.Professor{Code: "1"}),
+			StatusCode: http.StatusNotFound,
+		},
+		{
+			Name:           "set one professor",
+			Body:           bodyBuilder(&university.Professor{Name: "changed name"}),
+			StatusCode:     http.StatusOK,
+			Professors:     []*university.Professor{{Name: "test", Code: "1"}},
+			ProfessorCode:  "1",
+			ExpectedResult: bodyBuilder(&university.Professor{Code: "1", Name: "changed name"}),
+		},
+	}
+
+	for _, tc := range tctc {
+		t.Run(tc.Name, func(t *testing.T) {
+			professorHandle := setup()
+			for _, professor := range tc.Professors {
+				professorHandle.Storage.Set(professor)
+			}
+
+			buffer := &bytes.Buffer{}
+			buffer.Write(tc.Body)
+
+			w, r := buildRequest(http.MethodPut, fmt.Sprintf("http://localhost:8080?code=%s", tc.ProfessorCode), buffer)
+			professorHandle.UpdateProfessor(w, r)
+
+			if w.Code != tc.StatusCode {
+				t.Error("unexpected status.", "expected", tc.StatusCode, "but got", w.Code)
+			}
+
+			if tc.ExpectedResult == nil {
+				return
+			}
+
+			professor, _ := professorHandle.Storage.Get(tc.ProfessorCode)
+			result := bodyBuilder(professor)
+
+			if !bytes.Equal(result, tc.ExpectedResult) {
+				t.Error("unexpected result for set professor", "expected", string(tc.ExpectedResult), "got", string(result))
+			}
+		})
+	}
+}
