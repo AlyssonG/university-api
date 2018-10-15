@@ -41,3 +41,11 @@ func (ss *StudentStorage) Delete(studentCode string) error {
 	delete(ss.Store, studentCode)
 	return nil
 }
+
+func (ss *StudentStorage) GetAll() ([]*university.Student, error) {
+	response := []*university.Student{}
+	for _, value := range ss.Store {
+		response = append(response, value)
+	}
+	return response, nil
+}

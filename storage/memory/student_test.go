@@ -80,3 +80,43 @@ func TestStorageDelete(t *testing.T) {
 		t.Error("delete operation is not deleting from memory")
 	}
 }
+
+func TestGetAll(t *testing.T) {
+	storage := memory.StudentStorage{
+		Store: make(map[string]*university.Student),
+	}
+
+	studentA := &university.Student{
+		Name: "Rogerinho",
+		Code: "ABC",
+	}
+
+	storage.Store["ABC"] = studentA
+
+	studentB := &university.Student{
+		Name: "Rogerinho",
+		Code: "CBA",
+	}
+
+	storage.Store["CBA"] = studentB
+
+	students := []*university.Student{
+		studentA,
+		studentB,
+	}
+
+	result, _ := storage.GetAll()
+	for _, expected := range result {
+		found := false
+		for _, student := range students {
+			if student.Code == expected.Code {
+				found = true
+			}
+		}
+
+		if !found {
+			t.Error("it is missing a student in get all return")
+		}
+		return
+	}
+}
