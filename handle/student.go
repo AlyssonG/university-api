@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sort"
 
 	"github.com/alyssong/university-api/university"
 
@@ -60,6 +61,8 @@ func (sh *StudentHandle) getStudents(w http.ResponseWriter, r *http.Request) {
 		sh.Logger.Println("error while recovering students", "err", err)
 		return
 	}
+
+	sort.Slice(students, func(i, j int) bool { return students[i].Code < students[j].Code })
 
 	body, err := json.Marshal(students)
 	if err != nil {
