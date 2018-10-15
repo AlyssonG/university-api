@@ -2,9 +2,12 @@ package handle
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sort"
+
+	"github.com/alyssong/university-api/university"
 
 	"github.com/alyssong/university-api/storage"
 )
@@ -69,4 +72,42 @@ func (p *Professor) getAllProfessors(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "Application/json")
 	w.Write(response)
+}
+
+func (p *Professor) SetProfessor(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, "error while reading body", http.StatusInternalServerError)
+		p.Logger.Println("error while reading body", "err", err)
+		return
+	}
+
+	professor := &university.Professor{}
+	err = json.Unmarshal(body, professor)
+	if err != nil {
+		http.Error(w, "error while parsing body", http.StatusInternalServerError)
+		p.Logger.Println("error while parsing body", "err", err)
+		return
+	}
+
+	storedProfessor, err := p.Storage.Get(professor.Code)
+	if storedProfessor != nil {
+		http.Error(w, "professor already exists with this code", http.StatusConflict)
+		return
+	}
+
+	_, err = p.Storage.Set(professor)
+	if err != nil {
+		http.Error(w, "error while creating professor record on db", http.StatusInternalServerError)
+		p.Logger.Println("error while creating professor record on db", "err", err)
+		return
+	}
+
+	w.Write([]byte("success"))
 }
