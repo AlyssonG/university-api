@@ -139,11 +139,10 @@ func TestDeleteStudent(t *testing.T) {
 		},
 	}
 
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:8080/student/delete?code=test", nil)
 	writter := &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
-
-	request := httptest.NewRequest(http.MethodDelete, "http://localhost:8080/student/delete?code=test", nil)
 
 	studentHandle.DeleteStudent(writter, request)
 	if writter.Code != http.StatusNotFound {
