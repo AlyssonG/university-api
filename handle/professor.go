@@ -109,5 +109,5 @@ func (p *Professor) SetProfessor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("success"))
+	w.Write([]byte("{\"status\": \"success\"}"))
 }
