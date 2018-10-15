@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"testing"
 
@@ -30,15 +29,12 @@ func TestGetStudent(t *testing.T) {
 	}
 
 	studentHandle.Storage.Set(student)
+
 	writter := &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
 
-	request := &http.Request{
-		URL: &url.URL{
-			RawQuery: "id=abc",
-		},
-	}
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
 
 	studentHandle.GetStudent(writter, request)
 	if writter.Code != http.StatusOK {
