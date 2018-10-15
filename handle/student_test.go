@@ -30,11 +30,10 @@ func TestGetStudent(t *testing.T) {
 
 	studentHandle.Storage.Set(student)
 
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
 	writter := &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
-
-	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
 
 	studentHandle.GetStudent(writter, request)
 	if writter.Code != http.StatusOK {
@@ -73,8 +72,14 @@ func TestSetStudent(t *testing.T) {
 		},
 	}
 
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student", nil)
 	writter := &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.SetStudent(writter, request)
+	if writter.Code != http.StatusMethodNotAllowed {
+		t.Error("invalid method is accepted in set student")
 	}
 
 	student := &university.Student{
@@ -90,7 +95,10 @@ func TestSetStudent(t *testing.T) {
 	buf := &bytes.Buffer{}
 	buf.Write(body)
 
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/student", buf)
+	request = httptest.NewRequest(http.MethodPost, "http://localhost:8080/student", buf)
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
 
 	studentHandle.SetStudent(writter, request)
 
