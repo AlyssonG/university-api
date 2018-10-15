@@ -19,14 +19,10 @@ func main() {
 		},
 	}
 
-	student := &university.Student{
-		Name: "Rogerinho",
-		Code: "ABC",
-	}
-
-	studentHandle.Storage.Set(student)
-
 	http.HandleFunc("/student", studentHandle.GetStudent)
+	http.HandleFunc("/student/new", studentHandle.SetStudent)
+	http.HandleFunc("/student/delete", studentHandle.SetStudent)
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Server error", "err", err)
 	}
