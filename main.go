@@ -21,7 +21,7 @@ func main() {
 
 	http.HandleFunc("/student", studentHandle.GetStudent)
 	http.HandleFunc("/student/new", studentHandle.SetStudent)
-	http.HandleFunc("/student/delete", studentHandle.SetStudent)
+	http.HandleFunc("/student/delete", studentHandle.DeleteStudent)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Server error", "err", err)
