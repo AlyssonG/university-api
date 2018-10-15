@@ -80,6 +80,11 @@ func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
 	query := r.URL.Query()
 	code := query.Get("code")
 

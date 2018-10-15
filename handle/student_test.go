@@ -139,8 +139,18 @@ func TestDeleteStudent(t *testing.T) {
 		},
 	}
 
-	request := httptest.NewRequest(http.MethodDelete, "http://localhost:8080/student/delete?code=test", nil)
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student/delete?code=test", nil)
 	writter := &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.DeleteStudent(writter, request)
+	if writter.Code != http.StatusMethodNotAllowed {
+		t.Error("delete endpoint cannot accept another http method but delete")
+	}
+
+	request = httptest.NewRequest(http.MethodDelete, "http://localhost:8080/student/delete?code=test", nil)
+	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
 
