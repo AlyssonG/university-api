@@ -23,6 +23,16 @@ func TestGetStudent(t *testing.T) {
 		},
 	}
 
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/student?id=abc", nil)
+	writter := &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+
+	studentHandle.GetStudent(writter, request)
+	if writter.Code != http.StatusMethodNotAllowed {
+		t.Error("get student should just accept get method")
+	}
+
 	student := &university.Student{
 		Name: "Rogerinho",
 		Code: "abc",
@@ -30,8 +40,8 @@ func TestGetStudent(t *testing.T) {
 
 	studentHandle.Storage.Set(student)
 
-	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
-	writter := &httptest.ResponseRecorder{
+	request = httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
+	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
 
@@ -61,6 +71,36 @@ func TestGetStudent(t *testing.T) {
 	studentHandle.GetStudent(writter, request)
 	if writter.Code != http.StatusNotFound {
 		t.Error("expecting status not found when student is not in storage", "status", writter.Code)
+	}
+
+	otherStudent := &university.Student{
+		Name: "Rogerinho",
+		Code: "cba",
+	}
+
+	studentHandle.Storage.Set(student)
+	studentHandle.Storage.Set(otherStudent)
+
+	students := []*university.Student{}
+	students = append(students, student, otherStudent)
+
+	request = httptest.NewRequest(http.MethodGet, "http://localhost:8080/student", nil)
+	writter = &httptest.ResponseRecorder{
+		Body: &bytes.Buffer{},
+	}
+	studentHandle.GetStudent(writter, request)
+
+	if writter.Code != http.StatusOK {
+		t.Error("invalid status for a valid request and server state")
+	}
+
+	body, err = json.Marshal(students)
+	if err != nil {
+		t.Fatal("error while converting student slice to json")
+	}
+
+	if !bytes.Equal(body, writter.Body.Bytes()) {
+		t.Error("invalid return for api", "\ngot\n", string(writter.Body.Bytes()), "\nexpected\n", string(body))
 	}
 }
 

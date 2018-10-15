@@ -19,9 +19,22 @@ type StudentHandle struct {
 
 //GetStudent expects a parameter ID and returns data for a student with that id
 func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
 	query := r.URL.Query()
 	studentID := query.Get("id")
 
+	if studentID != "" {
+		sh.getSpecificStudent(studentID, w, r)
+	} else {
+		sh.getStudents(w, r)
+	}
+}
+
+func (sh *StudentHandle) getSpecificStudent(studentID string, w http.ResponseWriter, r *http.Request) {
 	student, err := sh.Storage.Get(studentID)
 	if err != nil || student == nil {
 		http.Error(w, "student not foundt found", http.StatusNotFound)
@@ -33,6 +46,25 @@ func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "error while enconding student", http.StatusInternalServerError)
 		sh.Logger.Println("error while encoding student to json", "err", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "Application/json")
+	w.Write(body)
+}
+
+func (sh *StudentHandle) getStudents(w http.ResponseWriter, r *http.Request) {
+	students, err := sh.Storage.GetAll()
+	if err != nil {
+		http.Error(w, "error while recovering students", http.StatusInternalServerError)
+		sh.Logger.Println("error while recovering students", "err", err)
+		return
+	}
+
+	body, err := json.Marshal(students)
+	if err != nil {
+		http.Error(w, "error while enconding students", http.StatusInternalServerError)
+		sh.Logger.Println("error while encoding students to json", "err", err)
 		return
 	}
 
