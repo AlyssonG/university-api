@@ -2,9 +2,6 @@ package storage
 
 import "github.com/alyssong/university-api/university"
 
-//Student defines the methods for handle with student storage.
-//It defines three methods Set, Get and Delete.
-//PS.:Set should be used to create or update a Student record.
 type Student interface {
 	Set(*university.Student) (string, error)
 	Get(string) (*university.Student, error)
@@ -17,4 +14,12 @@ type Professor interface {
 	Get(string) (*university.Professor, error)
 	GetAll() ([]*university.Professor, error)
 	Delete(string) error
+}
+
+type Class interface {
+	Get(string) (*university.Class, error)
+	New(code, professorCode string) error
+	AddStudents(string, []string) error
+	RemoveStudents(string, []string) error
+	SetProfessor(string, professorCode string) error
 }
