@@ -23,7 +23,7 @@ func TestGetStudent(t *testing.T) {
 		},
 	}
 
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/student?id=abc", nil)
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/student?code=abc", nil)
 	writter := &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
@@ -40,7 +40,7 @@ func TestGetStudent(t *testing.T) {
 
 	Student.Storage.Set(student)
 
-	request = httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
+	request = httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?code=abc", nil)
 	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
