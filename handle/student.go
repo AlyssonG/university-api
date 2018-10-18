@@ -12,14 +12,14 @@ import (
 	"github.com/alyssong/university-api/storage"
 )
 
-//StudentHandle defines the API endpoints implementations for student operations
-type StudentHandle struct {
+//Student defines the API endpoints implementations for student operations
+type Student struct {
 	Logger  *log.Logger
 	Storage storage.Student
 }
 
 //GetStudent expects a parameter ID and returns data for a student with that id
-func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
+func (sh *Student) GetStudent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
@@ -35,17 +35,17 @@ func (sh *StudentHandle) GetStudent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (sh *StudentHandle) getSpecificStudent(studentID string, w http.ResponseWriter, r *http.Request) {
+func (sh *Student) getSpecificStudent(studentID string, w http.ResponseWriter, r *http.Request) {
 	student, err := sh.Storage.Get(studentID)
 	if err != nil || student == nil {
-		http.Error(w, "student not foundt found", http.StatusNotFound)
+		http.Error(w, "{\"message\": \"student not foundt found\"}", http.StatusNotFound)
 		sh.Logger.Println("student not found for id", studentID, "err", err)
 		return
 	}
 
 	body, err := json.Marshal(student)
 	if err != nil {
-		http.Error(w, "error while enconding student", http.StatusInternalServerError)
+		http.Error(w, "{\"message\": \"error while enconding student\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while encoding student to json", "err", err)
 		return
 	}
@@ -54,10 +54,10 @@ func (sh *StudentHandle) getSpecificStudent(studentID string, w http.ResponseWri
 	w.Write(body)
 }
 
-func (sh *StudentHandle) getStudents(w http.ResponseWriter, r *http.Request) {
+func (sh *Student) getStudents(w http.ResponseWriter, r *http.Request) {
 	students, err := sh.Storage.GetAll()
 	if err != nil {
-		http.Error(w, "error while recovering students", http.StatusInternalServerError)
+		http.Error(w, "{\"message\": \"error while recovering students\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while recovering students", "err", err)
 		return
 	}
@@ -66,7 +66,7 @@ func (sh *StudentHandle) getStudents(w http.ResponseWriter, r *http.Request) {
 
 	body, err := json.Marshal(students)
 	if err != nil {
-		http.Error(w, "error while enconding students", http.StatusInternalServerError)
+		http.Error(w, "{\"message\": \"error while enconding students\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while encoding students to json", "err", err)
 		return
 	}
@@ -75,9 +75,9 @@ func (sh *StudentHandle) getStudents(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
+func (sh *Student) SetStudent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+		http.Error(w, "{\"message\": \"invalid method\"}", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -85,7 +85,7 @@ func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		http.Error(w, "invalid request body", http.StatusInternalServerError)
+		http.Error(w, "{\"message\": \"invalid request body\"}", http.StatusInternalServerError)
 		sh.Logger.Println("invalid body to create student", "body", string(body))
 		return
 	}
@@ -99,22 +99,22 @@ func (sh *StudentHandle) SetStudent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s, _ := sh.Storage.Get(student.Code); s != nil {
-		http.Error(w, "a student with this data is registred in the system", http.StatusConflict)
+		http.Error(w, "{\"message\": \"a student with this data is registred in the system\"}", http.StatusConflict)
 		sh.Logger.Println("a student with this data is registred in the system", "code", s.Code)
 		return
 	}
 
 	_, err = sh.Storage.Set(student)
 	if err != nil {
-		http.Error(w, "error while saving student in db", http.StatusInternalServerError)
+		http.Error(w, "{\"message\": \"error while saving student in db\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while saving student in db", "err", err)
 		return
 	}
 
-	w.Write([]byte("created"))
+	w.Write([]byte("{\"status\": \"created\"}"))
 }
 
-func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
+func (sh *Student) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
@@ -125,13 +125,13 @@ func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 
 	student, _ := sh.Storage.Get(code)
 	if student == nil {
-		http.Error(w, "this student does not exists", http.StatusNotFound)
+		http.Error(w, "{\"message\": \"this student does not exists\"}", http.StatusNotFound)
 		return
 	}
 
 	err := sh.Storage.Delete(code)
 	if err != nil {
-		http.Error(w, "error while deleting record", http.StatusInternalServerError)
+		http.Error(w, "{\"message\": \"error while deleting record\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while deleting student record", "err", err)
 		return
 	}
@@ -139,7 +139,7 @@ func (sh *StudentHandle) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("deleted"))
 }
 
-func (sh *StudentHandle) UpdateStudent(w http.ResponseWriter, r *http.Request) {
+func (sh *Student) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
@@ -150,21 +150,21 @@ func (sh *StudentHandle) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 
 	student, _ := sh.Storage.Get(code)
 	if student == nil {
-		http.Error(w, "student not found", http.StatusNotFound)
+		http.Error(w, "{\"message\": \"student not found\"}", http.StatusNotFound)
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		http.Error(w, "error while reading request body", http.StatusInternalServerError)
+		http.Error(w, "{\"status\": \"error while reading request body\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while reading request body", "err", err)
 	}
 
 	studentData := &university.Student{}
 	err = json.Unmarshal(body, studentData)
 	if err != nil {
-		http.Error(w, "error while parsing body", http.StatusInternalServerError)
+		http.Error(w, "{\"status\": \"error while parsing body\"}", http.StatusInternalServerError)
 		sh.Logger.Println("error while parsing student body to struct", "err", err)
 		return
 	}
@@ -173,7 +173,7 @@ func (sh *StudentHandle) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	student.Course = studentData.Course
 	_, err = sh.Storage.Set(student)
 	if err != nil {
-		http.Error(w, "error on student storage", http.StatusInternalServerError)
+		http.Error(w, "{\"status\": \"error on student storage\"}", http.StatusInternalServerError)
 		sh.Logger.Println("cannot update student record in storage", "err", err)
 		return
 	}

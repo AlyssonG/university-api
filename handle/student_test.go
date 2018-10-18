@@ -16,7 +16,7 @@ import (
 )
 
 func TestGetStudent(t *testing.T) {
-	studentHandle := &handle.StudentHandle{
+	Student := &handle.Student{
 		Logger: log.New(os.Stdout, " test ", 0),
 		Storage: &memory.StudentStorage{
 			Store: make(map[string]*university.Student),
@@ -28,7 +28,7 @@ func TestGetStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.GetStudent(writter, request)
+	Student.GetStudent(writter, request)
 	if writter.Code != http.StatusMethodNotAllowed {
 		t.Error("get student should just accept get method")
 	}
@@ -38,14 +38,14 @@ func TestGetStudent(t *testing.T) {
 		Code: "abc",
 	}
 
-	studentHandle.Storage.Set(student)
+	Student.Storage.Set(student)
 
 	request = httptest.NewRequest(http.MethodGet, "http://localhost:8080/student?id=abc", nil)
 	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.GetStudent(writter, request)
+	Student.GetStudent(writter, request)
 	if writter.Code != http.StatusOK {
 		t.Error("invalid status")
 	}
@@ -63,12 +63,12 @@ func TestGetStudent(t *testing.T) {
 		t.Error("wrong return for student request")
 	}
 
-	studentHandle.Storage.Delete("abc")
+	Student.Storage.Delete("abc")
 	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.GetStudent(writter, request)
+	Student.GetStudent(writter, request)
 	if writter.Code != http.StatusNotFound {
 		t.Error("expecting status not found when student is not in storage", "status", writter.Code)
 	}
@@ -78,8 +78,8 @@ func TestGetStudent(t *testing.T) {
 		Code: "cba",
 	}
 
-	studentHandle.Storage.Set(student)
-	studentHandle.Storage.Set(otherStudent)
+	Student.Storage.Set(student)
+	Student.Storage.Set(otherStudent)
 
 	students := []*university.Student{}
 	students = append(students, student, otherStudent)
@@ -88,7 +88,7 @@ func TestGetStudent(t *testing.T) {
 	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
-	studentHandle.GetStudent(writter, request)
+	Student.GetStudent(writter, request)
 
 	if writter.Code != http.StatusOK {
 		t.Error("invalid status for a valid request and server state")
@@ -105,7 +105,7 @@ func TestGetStudent(t *testing.T) {
 }
 
 func TestSetStudent(t *testing.T) {
-	studentHandle := &handle.StudentHandle{
+	Student := &handle.Student{
 		Logger: log.New(os.Stdout, " test ", 0),
 		Storage: &memory.StudentStorage{
 			Store: make(map[string]*university.Student),
@@ -117,7 +117,7 @@ func TestSetStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.SetStudent(writter, request)
+	Student.SetStudent(writter, request)
 	if writter.Code != http.StatusMethodNotAllowed {
 		t.Error("invalid method is accepted in set student")
 	}
@@ -140,13 +140,13 @@ func TestSetStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.SetStudent(writter, request)
+	Student.SetStudent(writter, request)
 
 	if writter.Code != http.StatusOK {
 		t.Fatal("invalid status code for a valid request", "code", writter.Code)
 	}
 
-	if s, err := studentHandle.Storage.Get("test"); s.Name != student.Name || err != nil {
+	if s, err := Student.Storage.Get("test"); s.Name != student.Name || err != nil {
 		t.Error("student storage is not ok", "err", err)
 	}
 
@@ -164,7 +164,7 @@ func TestSetStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.SetStudent(writter, request)
+	Student.SetStudent(writter, request)
 
 	if writter.Code != http.StatusConflict {
 		t.Error("cannot create two student records with the same code", "status code", writter.Code)
@@ -172,7 +172,7 @@ func TestSetStudent(t *testing.T) {
 }
 
 func TestDeleteStudent(t *testing.T) {
-	studentHandle := &handle.StudentHandle{
+	Student := &handle.Student{
 		Logger: log.New(os.Stdout, " test ", 0),
 		Storage: &memory.StudentStorage{
 			Store: make(map[string]*university.Student),
@@ -184,7 +184,7 @@ func TestDeleteStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.DeleteStudent(writter, request)
+	Student.DeleteStudent(writter, request)
 	if writter.Code != http.StatusMethodNotAllowed {
 		t.Error("delete endpoint cannot accept another http method but delete")
 	}
@@ -194,7 +194,7 @@ func TestDeleteStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.DeleteStudent(writter, request)
+	Student.DeleteStudent(writter, request)
 	if writter.Code != http.StatusNotFound {
 		t.Error("it cant be possible to delete a non existing student record")
 	}
@@ -204,20 +204,20 @@ func TestDeleteStudent(t *testing.T) {
 		Code: "test",
 	}
 
-	studentHandle.Storage.Set(student)
+	Student.Storage.Set(student)
 
 	writter = &httptest.ResponseRecorder{
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.DeleteStudent(writter, request)
+	Student.DeleteStudent(writter, request)
 	if writter.Code != http.StatusOK {
 		t.Error("invalid status for successful operation", "code", writter.Code)
 	}
 }
 
 func TestUpdateStudent(t *testing.T) {
-	studentHandle := &handle.StudentHandle{
+	Student := &handle.Student{
 		Logger: log.New(os.Stdout, " test ", 0),
 		Storage: &memory.StudentStorage{
 			Store: make(map[string]*university.Student),
@@ -229,7 +229,7 @@ func TestUpdateStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.UpdateStudent(writter, request)
+	Student.UpdateStudent(writter, request)
 	if writter.Code != http.StatusMethodNotAllowed {
 		t.Error("invalid http method for update student endpoint")
 	}
@@ -239,7 +239,7 @@ func TestUpdateStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.UpdateStudent(writter, request)
+	Student.UpdateStudent(writter, request)
 	if writter.Code != http.StatusNotFound {
 		t.Error("updating a non existing student should throw a not found status", "got", writter.Code)
 	}
@@ -250,7 +250,7 @@ func TestUpdateStudent(t *testing.T) {
 		Course: "CS",
 	}
 
-	studentHandle.Storage.Set(student)
+	Student.Storage.Set(student)
 
 	student.Course = "EC"
 
@@ -263,12 +263,12 @@ func TestUpdateStudent(t *testing.T) {
 		Body: &bytes.Buffer{},
 	}
 
-	studentHandle.UpdateStudent(writter, request)
+	Student.UpdateStudent(writter, request)
 	if writter.Code != http.StatusOK {
 		t.Fatal("invalid status code for a valid request", "got", writter.Code, "expected", http.StatusOK)
 	}
 
-	result, _ := studentHandle.Storage.Get(student.Code)
+	result, _ := Student.Storage.Get(student.Code)
 	if result.Course != student.Course {
 		t.Error("update student endpoint is not updating record in storage", "expected", student.Course, "got", result.Course)
 	}

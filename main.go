@@ -13,7 +13,7 @@ import (
 
 func main() {
 	logger := log.New(os.Stdout, "-- University API --", 0)
-	studentHandle := handle.StudentHandle{
+	Student := handle.Student{
 		Logger: logger,
 		Storage: &memory.StudentStorage{
 			Store: make(map[string]*university.Student),
@@ -27,10 +27,10 @@ func main() {
 		},
 	}
 
-	http.HandleFunc("/student", studentHandle.GetStudent)
-	http.HandleFunc("/student/new", studentHandle.SetStudent)
-	http.HandleFunc("/student/delete", studentHandle.DeleteStudent)
-	http.HandleFunc("/student/update", studentHandle.UpdateStudent)
+	http.HandleFunc("/student", Student.GetStudent)
+	http.HandleFunc("/student/new", Student.SetStudent)
+	http.HandleFunc("/student/delete", Student.DeleteStudent)
+	http.HandleFunc("/student/update", Student.UpdateStudent)
 
 	http.HandleFunc("/professor", professorHandle.GetProfessor)
 	http.HandleFunc("/professor/new", professorHandle.SetProfessor)
