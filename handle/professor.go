@@ -17,6 +17,21 @@ type Professor struct {
 	Storage storage.Professor
 }
 
+func (p *Professor) Handle(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		p.GetProfessor(w, r)
+	case http.MethodPost:
+		p.SetProfessor(w, r)
+	case http.MethodPut:
+		p.UpdateProfessor(w, r)
+	case http.MethodDelete:
+		p.DeleteProfessor(w, r)
+	default:
+		http.Error(w, "{\"message\": \"invalid method\"}", http.StatusMethodNotAllowed)
+	}
+}
+
 func (p *Professor) GetProfessor(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "{}", http.StatusMethodNotAllowed)

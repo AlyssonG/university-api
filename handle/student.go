@@ -18,6 +18,21 @@ type Student struct {
 	Storage storage.Student
 }
 
+func (s *Student) Handle(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.GetStudent(w, r)
+	case http.MethodPost:
+		s.SetStudent(w, r)
+	case http.MethodPut:
+		s.UpdateStudent(w, r)
+	case http.MethodDelete:
+		s.DeleteStudent(w, r)
+	default:
+		http.Error(w, "{\"message\": \"invalid method\"}", http.StatusMethodNotAllowed)
+	}
+}
+
 //GetStudent expects a parameter ID and returns data for a student with that id
 func (sh *Student) GetStudent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -26,7 +41,7 @@ func (sh *Student) GetStudent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.URL.Query()
-	studentID := query.Get("id")
+	studentID := query.Get("code")
 
 	if studentID != "" {
 		sh.getSpecificStudent(studentID, w, r)
@@ -136,7 +151,7 @@ func (sh *Student) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("deleted"))
+	w.Write([]byte("{\"status\": \"deleted\"}"))
 }
 
 func (sh *Student) UpdateStudent(w http.ResponseWriter, r *http.Request) {

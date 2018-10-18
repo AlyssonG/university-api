@@ -12,31 +12,25 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "-- University API --", 0)
-	Student := handle.Student{
+	logger := log.New(os.Stdout, "-- University API -- ", log.LstdFlags)
+	student := handle.Student{
 		Logger: logger,
 		Storage: &memory.StudentStorage{
 			Store: make(map[string]*university.Student),
 		},
 	}
 
-	professorHandle := handle.Professor{
+	professor := handle.Professor{
 		Logger: logger,
 		Storage: &memory.ProfessorStorage{
 			Store: make(map[string]*university.Professor),
 		},
 	}
 
-	http.HandleFunc("/student", Student.GetStudent)
-	http.HandleFunc("/student/new", Student.SetStudent)
-	http.HandleFunc("/student/delete", Student.DeleteStudent)
-	http.HandleFunc("/student/update", Student.UpdateStudent)
+	http.HandleFunc("/student", student.Handle)
+	http.HandleFunc("/professor", professor.Handle)
 
-	http.HandleFunc("/professor", professorHandle.GetProfessor)
-	http.HandleFunc("/professor/new", professorHandle.SetProfessor)
-	http.HandleFunc("/professor/delete", professorHandle.DeleteProfessor)
-	http.HandleFunc("/professor/update", professorHandle.UpdateProfessor)
-
+	logger.Println("Server started with success")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Server error", "err", err)
 	}
