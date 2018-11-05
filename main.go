@@ -27,8 +27,16 @@ func main() {
 		},
 	}
 
+	class := handle.Class{
+		Logger: logger,
+		Storage: &memory.ClassStorage{
+			Store: make(map[string]*university.Class),
+		},
+	}
+
 	http.HandleFunc("/student", student.Handle)
 	http.HandleFunc("/professor", professor.Handle)
+	http.HandleFunc("/class", class.Handle)
 
 	logger.Println("Server started with success")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
